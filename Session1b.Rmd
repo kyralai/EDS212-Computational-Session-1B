@@ -1,0 +1,72 @@
+---
+title: "EDS212 Session 1B"
+output: html_document
+date: '2023-08-04'
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+install.packages("vctrs")
+library(vctrs)
+install.packages("tidyverse", dependencies = TRUE)
+library(tidyverse)
+```
+Exponents and logs in R
+- log()=natural log
+- log10()=log base 10
+- exp()=natual exponential 
+
+To make sequence of values stored in a vector in R, use the seq() function
+- seq(from = start_value, to = end_value, by = increment)
+- To create a sequence from 2-18 by increments of 0.3, use:
+
+```{r seq}
+seq(from = 2, to = 18, by = 0.3)
+```
+Use the length= argument within seq() to specify amount of values you want
+
+To get 30 values between 2 and 18, evenly spaced, use: 
+```{r}
+seq(from = 2, to = 18, length = 30)
+```
+- Use keyboard shortcut "cmd+opt+I" to make a new code chunk
+- Enclosing text in ** or __ on either end makes it **bold**; Enclosing text in * or _ on either end makes it _italic_; enclosing text in **_ or __* on either end makes it **_bold and italic_**
+
+**Making the logistic growth function**
+- Use the shortcut "Cmd+opt+X"
+- Expression for population size at anytime following logistic growth is
+  - Nt=K/1+(K-N0/N0)e^-rt
+```{r}
+pop_logistic <- function(capacity, init_pop, rate, time_yr) {
+  capacity / (1 + ((capacity - init_pop) / init_pop) * exp(-rate * time_yr))
+}
+```
+
+Predict the estimated population of chipmunks in one region one time
+- K=2580 individuals
+- r= 0.32(yr^-1)
+- N0=230 individuals
+- t=2.4 years
+```{r}
+pop_logistic(capacity = 2580, init_pop = 230, rate = 0.32, time_yr = 2.4)
+```
+Predict the estimated population of chipmunks in one region many times using a sequence for the time input
+- 0-20 years by 1/2 year increments 
+```{r}
+# First, create the vector (a sequence of values)
+time_vec <- seq(from = 0, to = 20, by = 0.5)
+
+# Then, use that as your time input in the model and save the output in a variable:
+chipmunk_pop<- pop_logistic(capacity = 2580, init_pop = 230, rate = 0.32, time_yr = time_vec)
+```
+**Make a Plot**
+Create a dataframe from out time sequence and the predicted populations
+```{r}
+chipmunk_df <- data.frame(time_vec, chipmunk_pop)
+
+head(chipmunk_df)
+
+ggplot(data = chipmunk_df, aes(x = time_vec, y = chipmunk_pop)) +
+  geom_point()
+```
+
