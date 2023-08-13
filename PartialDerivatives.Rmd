@@ -1,0 +1,137 @@
+---
+title: "Higher order derivatives, partial derivatives, plotting functions in ggplot"
+output: html_document
+date: "2023-08-13"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+install.packages("palmerpenguins")
+library(palmerpenguins)
+```
+**Plotting a function in ggplot2**
+```{r}
+eq = function(x){3*x^2 + 4} # Define function
+
+# Plot it over a specific range using the `geom_function` mark: 
+ggplot(data.frame(x = c(1, 100)), aes(x = x)) + 
+  geom_function(fun = eq)
+#ggplot(data.frame(x = c(1, 100)), aes(x = x)): This initializes a basic ggplot plot using a data frame with a single variable x that takes values from 1 to 100. The aes(x = x) specifies that the variable x will be used on the x-axis of the plot.
+
+#geom_function(fun = eq): This adds a geometric layer to the plot using the geom_function function. The fun parameter specifies the mathematical function that you want to plot. In this case, it uses a function called eq.
+```
+
+```{r}
+eq_2 = function(x){2.4 - 5*x^3 + 2.1*x^2} # Define function
+
+ggplot(data.frame(x = c(-50,50)), aes(x = x)) + 
+  geom_function(fun = eq_2)
+```
+**Plotting Derivatives**
+```{r}
+# Store the function C(t)
+ct <- function(t) {t ^ 3}
+
+# Plot it:
+ggplot(data.frame(t=c(-5, 5)), aes(x=t)) + 
+  geom_function(fun=ct)
+```
+```{r}
+# Find the derivative:
+dc_dt <- D(expression(t^3), 't')
+dc_dt
+```
+dc_dt <- D(expression(t^3), 't'): This line of code calculates the derivative of the mathematical expression t^3 with respect to the variable t.
+
+expression(t^3) defines the mathematical expression t^3.
+D(..., 't') is a function that computes the derivative of an expression with respect to a specified variable 't'.
+```{r}
+# Store the derivative as a function:
+dc_dt_fun <- function(t) {3 * t ^2}
+
+# Then plot them together! 
+ggplot(data.frame(t = c(-5, 5)), aes(x = t)) + 
+  geom_function(fun = ct, color = "red") +
+  geom_function(fun = dc_dt_fun, color = "blue")
+```
+**Partial Derivatives**
+Specify the variable you want to take the derivative with respect to.
+
+f(x,y,z)=2xy−3x2z3
+
+Find all partials, ∂f/∂x, ∂f/∂y and ∂f/∂z
+```{r}
+f_xyz <- expression(2*x*y - 3*(x^2)*(z^3))
+
+# Partial with respect to x: 
+df_dx <- D(f_xyz, 'x')
+df_dx
+```
+```{r}
+# Partial with respect to y: 
+df_dy <- D(f_xyz, 'y')
+df_dy
+```
+```{r}
+# Partial with respect to z: 
+df_dz <- D(f_xyz, 'z')
+df_dz
+```
+Find partial derivatives by defining the expression, then feeding the expression and partial into D(expression, partial derivative variable)
+
+**Final example**
+Given the function:
+P(q)=2cos(3q+0.4)−5.6e1.4q
+
+Find the instantaneous slope at q=0.8
+```{r}
+# First, create the expression: 
+pq <- expression(2 * cos(3 * q + 0.4) - 5.6 * exp(1.4 * q))
+
+# Find the first derivative with respect to q:
+dp_dq <- D(pq, 'q')
+
+# Return the first derivative:
+dp_dq
+```
+```{r}
+# Define value of q
+q <- 0.8
+
+# Evaluate dp_dq at that value: 
+eval(dp_dq)
+```
+**ggplot**
+Customize graph using penguins dataset from palmerpenguins 
+- Adding axis labels, titles & subtitles
+- Switching x & y axis
+- A few new graph types
+- Faceting
+- Updating colors
+```{r}
+ggplot(data = penguins, aes(x = flipper_length_mm, y = body_mass_g)) +
+         geom_point(aes(color = species)) +
+  scale_color_manual(values = c("purple","cyan3","goldenrod")) +
+  labs(x = "Flipper length (mm)",
+       y = "Body mass (g)",
+       title = "Palmer penguin size measurements",
+       subtitle = "Palmer Archipelago, Antarctica (2007 - 2009)",
+       caption = "Collected by Dr. Kristen Gorman and colleages at Palmer Station LTER") +
+  coord_flip() +
+  facet_wrap(~island) +
+  theme_minimal()
+```
+- ggplot(data = penguins, aes(x = flipper_length_mm, y = body_mass_g)): This sets up the base plot using the penguins dataset. It maps the flipper_length_mm column to the x-axis and the body_mass_g column to the y-axis using the aes() (aesthetic) function.
+
+- geom_point(aes(color = species)): This adds a scatter plot layer to the base plot. Each point represents a penguin's flipper length and body mass. The color = species mapping assigns a color to each point based on the penguin's species.
+
+- scale_color_manual(values = c("purple", "cyan3", "goldenrod")): This customizes the color scale used for the species aesthetic. It assigns specific colors to each species: "purple" for Adelie penguins, "cyan3" for Chinstrap penguins, and "goldenrod" for Gentoo penguins.
+
+- labs(...): This adds labels and titles to the plot. It sets the x-axis label, y-axis label, plot title, subtitle, and caption.
+
+- coord_flip(): This flips the x and y axes, effectively transposing the plot. This is often used to create horizontal bar-like plots when working with categorical variables.
+
+- facet_wrap(~island): This creates separate subplots for different levels of the island variable. Each subplot displays the scatter plot for a specific island in the Palmer Archipelago.
+
+- theme_minimal(): This applies a minimalistic theme to the plot, changing the overall appearance of the plot elements such as axis lines, labels, and grid lines.
